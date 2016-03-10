@@ -355,9 +355,16 @@ class ELFFile:
         except OSError:
             print "Error calling "+tool_nm+", do you have Xtensa toolchain in PATH?"
             sys.exit(1)
-        for l in proc.stdout:
+        has_error = 0
+        for l in proc.stdout:           
             fields = l.strip().split()
-            self.symbols[fields[2]] = int(fields[0], 16)
+            try:
+                self.symbols[fields[2]] = int(fields[0], 16)
+            except Exception:
+                print "bad symbols: '"+l+"'"
+                has_error = 1#return
+        if has_error == 1:
+            raise Exception('Bad sybol table')
 
     def get_symbol_addr(self, sym):
         self._fetch_symbols()
